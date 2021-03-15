@@ -16,7 +16,7 @@ module.exports = function () {
             return 1;
         },
         /*
-         * Retrieve a movie with a given id or return all the movies if the id is undefined.
+         * Retrieve a user with a given id or return all user if the id is undefined.
          */
         find: function (id) {
             if (id) {
@@ -30,7 +30,7 @@ module.exports = function () {
         },
         findOne: function (name) {
             if (name) {
-                return this.userList.find(function (element) {
+                return this.userList.find(function (element){
                     return element.username === name;
                 });
             }
@@ -39,7 +39,7 @@ module.exports = function () {
             }
         },
         /*
-         * Delete a movie with the given id.
+         * Delete a user with the given id.
          */
         remove: function (id) {
             var found = 0;
@@ -54,7 +54,7 @@ module.exports = function () {
             return found;
         },
         /*
-         * Update a movie with the given id
+         * Update a user with the given id
          */
         update: function (id, user) {
             var userIndex = this.userList.findIndex(function (element) {
