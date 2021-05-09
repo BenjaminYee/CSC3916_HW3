@@ -12,7 +12,8 @@ var authJwtController = require('./auth_jwt');
 var jwt = require('jsonwebtoken');
 var cors = require('cors');
 var User = require('./Users');
-var Movie = require('./movies')
+var Movie = require('./movies');
+
 var app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -203,7 +204,7 @@ router.get('/movies', function (req, res) {
 
 router.post('/movies', function (req, res){
     if (!req.body.title || !req.body.genre  || !req.body.yearReleased || !req.body.actors){
-        res.json({success: false, msg: 'Please include all fields, incl those not updated'})
+        res.json({success: false, msg: 'Please include all fields, include those not updated'})
     }
     else {
         var movie = new Movie();
