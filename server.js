@@ -208,8 +208,8 @@ router.post('/movies', function (req, res){
     else {
         var movie = new Movie();
         movie.title = req.body.title;
-        movie.yearReleased = req.body.yearReleased;
         movie.genre = req.body.genre;
+        movie.yearReleased = req.body.yearReleased;
         movie.actors = req.body.actors;
 
         movie.save(function (err) {
@@ -238,8 +238,8 @@ router.put('/movies', authJwtController.isAuthenticated, function (req, res){
             }
 
             movie.title = req.body.title;
-            movie.yearReleased = req.body.yearReleased;
             movie.genre = req.body.genre;
+            movie.yearReleased = req.body.yearReleased;
             movie.actors = req.body.actors;
 
             movie.save(function (err) {
