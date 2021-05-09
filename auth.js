@@ -1,18 +1,22 @@
-// Load required packages
+// Load required package
 var passport = require('passport');
-var BasicStrategy = require('passport-http').BasicStrategy;
-var User = require('./Schema/User')
-passport.use(new BasicStrategy(
-    function(username, password, done) {
-        //hard coded
+var JwtStrategy = require('passport-jwt').Strategy;
+var ExtractJwt = require('passport-jwt').ExtractJwt;
+var User = require('./Users');
 
-        User.findOne({username: username,password: password},function(err,result){
-            if(!result)  return done(null, false);
-            else
-                return done(null, result.username);
+var opts = {};
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme("jwt");
+opts.secretOrKey = process.env.SECRET_KEY;
 
-        })
-    }
-));
+passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+    User.findById(jwt_payload.id, function (err, user) {
+        if (user) {
+            done(null, user);
+        } else {
+            done(null, false);
+        }
+    });
+}));
 
-exports.isAuthenticated = passport.authenticate('basic', { session : false });
+exports.isAuthenticated = passport.authenticate('jwt', { session : false });
+exports.secret = opts.secretOrKey ;
