@@ -202,7 +202,7 @@ router.get('/movies', function (req, res) {
 
 
 router.post('/movies', function (req, res){
-    if (!req.body.title || !req.body.yearReleased || !req.body.genre || !req.body.actors){
+    if (!req.body.title || !req.body.genre  || !req.body.yearReleased || !req.body.actors){
         res.json({success: false, msg: 'Please include all fields, incl those not updated'})
     }
     else {
