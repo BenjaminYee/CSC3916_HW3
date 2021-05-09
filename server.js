@@ -12,7 +12,7 @@ var authJwtController = require('./auth_jwt');
 var jwt = require('jsonwebtoken');
 var cors = require('cors');
 var User = require('./Users');
-
+var Movie = require('./movies')
 var app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -83,6 +83,231 @@ router.post('/signin', function (req, res) {
             }
         })
     })
+});
+router.get('/movies/:title', function (req, res){
+    var movieSearch = new Movie();
+    movieSearch.title = req.params.title;
+
+    if (req.query.reviews == 1) {
+        Movie.aggregate([
+            {
+                $lookup:
+                    {
+                        from: "reviews",
+                        localField: "title",
+                        foreignField: "movie",
+                        as: "reviews"
+                    }
+            },
+            {
+                $match:
+                    {
+                        title: req.params.title
+                    }
+            }
+        ]).exec(function (err, movie) {
+            if (err) {
+                res.send(err);
+            }
+            if (movie == null) {
+                res.status(200).send({
+                    msg: 'Couldnt find requested movie',
+                    headers: req.headers,
+                    query: req.query,
+                    env: process.env.SECRET_KEY
+                })
+            } else {
+                res.status(200).send({
+                    movie: movie
+                })
+            }
+        })
+    } else {
+        //add title filters below
+        Movie.find({title: movieSearch.title}).select('title yearReleased genre actors').exec(function (err, movie) {
+            if (err) {
+                res.send(err);
+            }
+            if (movie == null) {
+                res.status(200).send({
+                    msg: 'Couldnt find requested movie',
+                    headers: req.headers,
+                    query: req.query,
+                    env: process.env.SECRET_KEY
+                })
+            } else {
+                res.status(200).send({
+                    movie: movie
+                })
+            }
+        })
+
+    }
+});
+
+router.get('/movies', function (req, res) {
+    var movieSearch = new Movie();
+    movieSearch.title = req.body.title;
+
+    if (req.query.reviews == 1) {
+        Movie.aggregate([
+            {
+                $lookup:
+                    {
+                        from: "reviews",
+                        localField: "title",
+                        foreignField: "movie",
+                        as: "reviews"
+                    }
+            }
+        ]).exec(function (err, movie) {
+            if (err) {
+                res.send(err);
+            }
+            if (movie == null) {
+                res.status(200).send({
+                    msg: 'Couldnt find requested movie',
+                    headers: req.headers,
+                    query: req.query,
+                    env: process.env.SECRET_KEY
+                })
+            } else {
+                res.status(200).send({
+                    movie: movie
+                })
+            }
+        })
+    } else {
+        Movie.find({}).select('title yearReleased genre actors').exec(function (err, movie) {
+            if (err) {
+                res.send(err);
+            }
+            if (movie == null) {
+                res.status(200).send({
+                    msg: 'Couldnt find requested movie',
+                    headers: req.headers,
+                    query: req.query,
+                    env: process.env.SECRET_KEY
+                })
+            } else {
+                res.status(200).send({
+                    movie: movie
+                })
+            }
+        })
+
+    }
+
+});
+
+
+router.post('/movies', function (req, res){
+    if (!req.body.title || !req.body.yearReleased || !req.body.genre || !req.body.actors){
+        res.json({success: false, msg: 'Please include all fields, incl those not updated'})
+    }
+    else {
+        var movie = new Movie();
+        movie.title = req.body.title;
+        movie.yearReleased = req.body.yearReleased;
+        movie.genre = req.body.genre;
+        movie.actors = req.body.actors;
+
+        movie.save(function (err) {
+            if (err) {
+                return res.json(err);
+            }
+
+            res.status(200).send({
+                msg: 'Movie saved',
+                headers: req.headers,
+                query: req.query,
+                env: process.env.SECRET_KEY
+            })
+        });
+    }
+});
+
+router.put('/movies', authJwtController.isAuthenticated, function (req, res){
+    if (!req.body.title){
+        res.json({success: false, msg: 'Please include a title to search movies by'})
+    }
+    else {
+        Movie.findOne({title: req.body.title}).select('title yearReleased genre actors').exec(function (err, movie) {
+            if (err) {
+                res.send(err);
+            }
+
+            movie.title = req.body.title;
+            movie.yearReleased = req.body.yearReleased;
+            movie.genre = req.body.genre;
+            movie.actors = req.body.actors;
+
+            movie.save(function (err) {
+                if (err) {
+                    return res.json(err);
+                }
+                res.status(200).send({
+                    msg: 'Movie updated',
+                    headers: req.headers,
+                    query: req.query,
+                    env: process.env.SECRET_KEY
+                })
+            });
+        })
+    }
+});
+
+router.delete('/movies', authJwtController.isAuthenticated, function (req, res){
+    Movie.deleteOne({title: req.body.title}).exec(function (err){
+        if(err){
+            res.send(err);
+        }
+
+        res.status(200).send({msg: 'Movie deleted', headers: req.headers, query: req.query, env: process.env.SECRET_KEY})
+    })
+});
+
+router.post('/reviews', authJwtController.isAuthenticated, function (req, res){
+    if (!req.body.movie || !req.body.text || !req.body.rating || !req.body.username){
+        res.json({success: false, msg: 'Please include all fields'})
+    }
+    else{
+        var review = new Review();
+        review.movie = req.body.movie;
+        review.username = req.body.username;
+        review.text = req.body.text;
+        review.rating = req.body.rating;
+
+        var movieSearch = new Movie();
+        movieSearch.title = req.body.movie;
+
+        Movie.findOne({title: movieSearch.title}).select('title yearReleased genre actors').exec(function (err, movie) {
+            if (err) {
+                res.send(err);
+            }
+            if (movie == null) {
+                res.status(200).send({
+                    msg: 'Couldnt find movie to associate review with',
+                    headers: req.headers,
+                    query: req.query,
+                    env: process.env.SECRET_KEY
+                })
+            } else {
+                review.save(function (err) {
+                    if (err) {
+                        return res.json(err);
+                    }
+
+                    res.status(200).send({
+                        msg: 'Review saved',
+                        headers: req.headers,
+                        query: req.query,
+                        env: process.env.SECRET_KEY
+                    })
+                });
+            }
+        })
+    }
 });
 
 app.use('/', router);
