@@ -13,10 +13,10 @@ mongoose.set('useCreateIndex', true);
 
 //schema for the movies
 var ReviewsSchema = new Schema({
-    usename:String;
-    movie:String;
-    text:String;
-    rating;
+    usename:String,
+    movie:String,
+    text:String,
+    rating:Number
 });
 //returning the model to the server
 module.exports = mongoose.model('Reviews', ReviewsSchema)
