@@ -77,7 +77,7 @@ router.post('/signin', function (req, res) {
             if (isMatch) {
                 var userToken = { id: user.id, username: user.username };
                 var token = jwt.sign(userToken, process.env.SECRET_KEY);
-                res.json ({success: true, token: 'JWT ' + token});
+                res.json ({success: true, token: 'JWT ' + token, username: userToken.username});
             }
             else {
                 res.status(401).send({success: false, msg: 'Authentication failed.'});
@@ -306,6 +306,37 @@ router.post('/reviews', authJwtController.isAuthenticated, function (req, res){
                         env: process.env.SECRET_KEY
                     })
                 });
+            }
+        })
+    }
+});
+router.get('/reviews', function (req, res){
+    if (!req.body.title){
+        res.json({success: false, msg: 'Please include a title to search reviews by'})
+    }
+    else{
+        var reviewSearch = new Review();
+        reviewSearch.movie = req.body.title;
+
+        Review.find({movie: reviewSearch.movie}).select('username movie text rating').exec( function (err, reviews){
+            if (err) {
+                res.send(err);
+            }
+            if (reviews == null) {
+                res.status(200).send({
+                    msg: 'Couldnt find any reviews for requested movie',
+                    headers: req.headers,
+                    query: req.query,
+                    env: process.env.SECRET_KEY
+                })
+            } else {
+                res.status(200).send({
+                    msg: 'Found reviews for movie',
+                    Review: reviews,
+                    headers: req.headers,
+                    query: req.query,
+                    env: process.env.SECRET_KEY
+                })
             }
         })
     }
