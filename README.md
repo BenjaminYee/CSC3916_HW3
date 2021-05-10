@@ -4,3 +4,6 @@
 link to Hw5 git :https://github.com/BenjaminYee/CSC3916_HW5 
 <br/>
 link to heroku:https://web-api-5.herokuapp.com/
+<br/>
+#Test for hw4
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/93c937b7d94064084f1f?action=collection%2Fimport#?env%5Byee_HW_4%5D=W3sia2V5IjoidXNlciIsInZhbHVlIjoibnVsbCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiSldUIiwidmFsdWUiOiJudWxsIiwiZW5hYmxlZCI6dHJ1ZX1d)
